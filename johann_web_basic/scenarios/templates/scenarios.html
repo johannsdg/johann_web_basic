@@ -1,0 +1,64 @@
+{% extends "base.html" %} {% block copyright %}
+<!--
+    # Copyright (c) 2020-present, The Johann Web Basic Authors. All Rights Reserved.
+    # Use of this source code is governed by a BSD-3-clause license that can
+    # be found in the LICENSE file. See the AUTHORS file for names of contributors.
+    -->
+{% endblock copyright %} {% block app_content %}
+<h1>Scenarios</h1>
+<p>On this page, you can manage and run scenarios.</p>
+{% for category, scores in data.items() %}
+<div class="card mb-3">
+  <div class="card-header">{{ category }}</div>
+  <div class="card-body">
+    <!-- Table -->
+    <table class="table">
+      <tr class="row">
+        <th class="col-5">Name</th>
+        <th class="col">Actions</th>
+        <th class="col"></th>
+        <th class="col"></th>
+        <th class="col"></th>
+      </tr>
+      {% for score in scores %}
+      <tr class="row">
+        <td class="col-5">{{score.name}}</td>
+        <td class="col">
+          <button
+            class="btn btn-light"
+            onclick='window.open("/scenarios/{{score.name}}","_self")'
+          >
+            View
+          </button>
+        </td>
+        <td class="col">
+          <button
+            class="btn btn-light"
+            onclick='window.open("/scenarios/{{score.name}}/status","_self")'
+          >
+            Status
+          </button>
+        </td>
+        <td class="col">
+          <button
+            class="btn btn-success"
+            onclick='window.open("/scenarios/{{score.name}}/launch","_self")'
+          >
+            Launch
+          </button>
+        </td>
+        <td class="col">
+          <button
+            class="btn btn-danger"
+            onclick='$.get("/johann/read_score/{{score.name}}?force=1")'
+          >
+            Reset
+          </button>
+        </td>
+        <!-- PLANNED: improve reset, both in result and method !-->
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endfor %} {% endblock %}

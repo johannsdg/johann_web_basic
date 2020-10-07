@@ -1,0 +1,56 @@
+{% extends "base.html" %} {% block copyright %}
+<!--
+    # Copyright (c) 2020-present, The Johann Web Basic Authors. All Rights Reserved.
+    # Use of this source code is governed by a BSD-3-clause license that can
+    # be found in the LICENSE file. See the AUTHORS file for names of contributors.
+    -->
+{% endblock copyright %}
+
+<!-- parts of this adapted from https://github.com/miguelgrinberg/flask-celery-example/blob/master/templates/index.html -->
+{% block scripts %} {{super()}}
+<script src="{{url_for('static', filename='renderjson.js')}}"></script>
+<script>
+  function update_progress(status_url, status_div) {
+    // send GET request to status URL
+    $.getJSON(status_url, function (data) {
+      // update UI
+      $(status_raw_full).text(JSON.stringify(data, null, 4));
+      $(status_raw_expandable).html(renderjson(data));
+      $("#last_update").text(new Date().toISOString());
+
+      /*
+            // rerun in 2 seconds
+            setTimeout(function() {
+                update_progress(status_url, status_div);
+            }, 2000);
+            */
+    });
+  }
+  renderjson.set_show_to_level(3);
+  $(window).on(
+    "load",
+    update_progress("/johann/scores/{{ data }}/status_alt", $("#status"))
+  ); // This is kind of a hack, but gets us around johann being http and this page potentially being https
+</script>
+{% endblock %} {% block app_content %}
+<h1>Scenario Status</h1>
+<div class="card">
+  <div class="card-header">
+    Scenario Status for '{{ data }}' as of: <label id="last_update">pending...</label>
+  </div>
+  <div class="card-body">
+    <ul class="nav nav-tabs">
+      <li class="active"><a data-toggle="tab" href="#full">Full</a></li>
+      <li><a data-toggle="tab" href="#expandable">Expandable</a></li>
+    </ul>
+    <div class="tab-content">
+      <div id="full" class="tab-pane fade in active">
+        <pre id="status_raw_full">pending...</pre>
+      </div>
+      <div id="expandable" class="tab-pane fade">
+        <pre id="status_raw_expandable">pending...</pre>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+# Copyright (c) 2020-present, The Johann Web Basic Authors. All Rights Reserved.
+# Use of this source code is governed by a BSD-3-clause license that can
+# be found in the LICENSE file. See the AUTHORS file for names of contributors.
+
+default_stages: [commit, push]
+
+repos:
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+        stages: [manual]
+      - id: check-useless-excludes
+        stages: [manual]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: master
+    hooks:
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-byte-order-marker
+      - id: check-docstring-first
+      - id: check-executables-have-shebangs
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: debug-statements
+      - id: detect-private-key
+      - id: fix-encoding-pragma
+        args: [--remove]
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: name-tests-test
+      - id: trailing-whitespace
+
+  - repo: https://github.com/timothycrosley/isort
+    rev: 5.0.2
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/psf/black
+    rev: stable
+    hooks:
+      - id: black
+
+  - repo: https://github.com/prettier/prettier
+    rev: 2.0.5
+    hooks:
+      - id: prettier
+        args: [--prose-wrap=always, --print-width=88]
+        exclude: johann_web_basic/static/.*
+
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.3
+    hooks:
+      - id: flake8
+        additional_dependencies: [flake8-bugbear]
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.6.2
+    hooks:
+      - id: bandit
+        entry: bandit -lll
+        exclude: tests
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v2.4.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+
+  - repo: local
+    hooks:
+      - id: check-todo
+        name: check-todo
+        language: pygrep
+        entry: (TODO|FIXME|FOOBAR|LEFT OFF HERE)
+        args: [-i]
+        exclude: (.pre-commit-config.yaml|johann_web_basic/static/.*)
+      - id: check-copyright-headers
+        name: check-copyright-headers
+        language: script
+        entry: scripts/check_copyright_headers.py
+        exclude: |
+          (?x)^(
+            \..+| # any file starting with '.'
+            .*\.in|
+            .*\.ini|
+            .*\.lock|
+            .*\.md|
+            .*\.txt|
+            AUTHORS|
+            LICENSE|
+            johann_web_basic/static/.*|
+          )$

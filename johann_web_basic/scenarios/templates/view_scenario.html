@@ -1,0 +1,21 @@
+{% extends "base.html" %} {% block copyright %}
+<!--
+    # Copyright (c) 2020-present, The Johann Web Basic Authors. All Rights Reserved.
+    # Use of this source code is governed by a BSD-3-clause license that can
+    # be found in the LICENSE file. See the AUTHORS file for names of contributors.
+    -->
+{% endblock copyright %} {% block app_content %}
+<h1>View Scenario</h1>
+<div class="card">
+  <div class="card-header">YAML for Scenario '{{ data.name }}'</div>
+  <div class="card-body">
+    <pre>{{ data.yaml_string }}</pre>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header">Raw, Internal JSON for Scenario '{{ data.name }}'</div>
+  <div class="card-body">
+    <pre>{{ data.raw_json_string }}</pre>
+  </div>
+</div>
+{% endblock %}

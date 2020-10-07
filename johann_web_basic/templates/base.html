@@ -1,0 +1,79 @@
+{% block doc %} {% block copyright %}
+<!--
+# Copyright (c) 2020-present, The Johann Web Basic Authors. All Rights Reserved.
+# Use of this source code is governed by a BSD-3-clause license that can
+# be found in the LICENSE file. See the AUTHORS file for names of contributors.
+-->
+{% endblock copyright %}
+<!DOCTYPE html>
+<html lang="en">
+  {% block html %}
+  <head>
+    {% block head %} {% block metas %}
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    {% endblock metas %} {% block styles %}
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='bootstrap_darkly.css') }}"
+    />
+    {% endblock styles %}
+
+    <title>
+      {% block page_title %} Johann {% endblock page_title %}
+    </title>
+    {% endblock head %}
+  </head>
+  <body>
+    {% block body %} {% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="/">Johann</a>
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/scenarios">Scenarios</a>
+        </li>
+      </ul>
+    </nav>
+    {% endblock navbar %} {% block content %}
+    <main role="main">
+      <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if messages
+        %}
+        <div class="row">
+          <div class="col-12">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+              <a class="close" title="Close" href="#" data-dismiss="alert">&times;</a>
+              {{ message }}
+            </div>
+            <!-- end .alert -->
+            {% endfor %}
+          </div>
+          <!-- end col-md -->
+        </div>
+        <!-- end row -->
+        {% endif %} {% endwith %} {# application content needs to be provided in the
+        app_content block #}
+        <div class="row">
+          <div class="col-12 mt-3">
+            {% block app_content %} {% endblock %}
+          </div>
+        </div>
+      </div>
+    </main>
+    {% endblock content %} {% block scripts %}
+    <script src="{{ url_for('static', filename='jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+    {% endblock scripts %} {% endblock body %}
+  </body>
+  {% endblock html %}
+</html>
+{% endblock doc %}

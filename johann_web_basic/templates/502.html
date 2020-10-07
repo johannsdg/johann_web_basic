@@ -1,0 +1,16 @@
+{% extends "base.html" %} {% block copyright %}
+<!--
+    # Copyright (c) 2020-present, The Johann Web Basic Authors. All Rights Reserved.
+    # Use of this source code is governed by a BSD-3-clause license that can
+    # be found in the LICENSE file. See the AUTHORS file for names of contributors.
+    -->
+{% endblock copyright %} {% block page_title %}Bad Gateway{% endblock page_title %} {%
+block app_content %}
+<div class="jumbotron">
+  <div class="text-center">
+    <h1>502</h1>
+    It looks like we had trouble talking to the Johann Conductor.<br />
+    Please make sure that it is running and, if so, check its logs.<br />
+  </div>
+</div>
+{% endblock app_content %}

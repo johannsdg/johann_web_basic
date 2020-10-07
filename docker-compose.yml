@@ -1,0 +1,23 @@
+# Copyright (c) 2020-present, The Johann Web Basic Authors. All Rights Reserved.
+# Use of this source code is governed by a BSD-3-clause license that can
+# be found in the LICENSE file. See the AUTHORS file for names of contributors.
+
+version: "2.4"
+
+networks:
+  public:
+  servicenet:
+    internal: true
+
+services:
+  johann_web:
+    container_name: johann_web
+    build:
+      context: ./
+    environment:
+      - FLASK_APP=app/main.py
+    ports:
+      - "80:80"
+    networks:
+      - public
+      - servicenet

@@ -1,0 +1,182 @@
+{% extends "base.html" %} {% block copyright %}
+<!--
+    # Copyright (c) 2020-present, The Johann Web Basic Authors. All Rights Reserved.
+    # Use of this source code is governed by a BSD-3-clause license that can
+    # be found in the LICENSE file. See the AUTHORS file for names of contributors.
+    -->
+{% endblock copyright %}
+
+<!-- parts of this adapted from https://github.com/miguelgrinberg/flask-celery-example/blob/master/templates/index.html -->
+
+{% block styles %} {{super()}}
+<script src="{{url_for('static', filename='jquery.min.js')}}"></script>
+<script src="{{url_for('static', filename='renderjson.js')}}"></script>
+<style>
+  .progress {
+    width: 100%;
+    text-align: center;
+  }
+</style>
+{% endblock %} {% block scripts %} {{super()}}
+<script>
+  var data;
+  var do_once = false;
+  renderjson.set_show_to_level(2)
+
+  function init() {
+      // add task status elements
+      var m_index;
+      data = {{ data|tojson|safe }};
+      $('#scenario_name').text(data.name);
+      var measures = data.measures;
+
+      // add 'overall' progress bar
+      //var div = $('<div class="panel-body"><h4>overall progress</h4><div class="progress"><div class="progress-bar" role="progressbar" aria-valuenow="0%" style="width:0%">0%</div></div><div>pending...</div><div>&nbsp;</div>');
+      var div = $('<div class="mb-3"><span class="h3">Overall Status - <span id="overall_state">pending...</span></span><div class="progress"><div id="overall_bar" class="progress-bar" role="progressbar" aria-valuenow="0%" style="width:0%">0%</div></div></div>');
+      $('#status').append(div);
+
+      for(m_index in measures) {
+          var measure_name = measures[m_index].name;
+          //div = $('<div class="panel-body"><h4>' + measure_name + '</h4><div class="progress"><div class="progress-bar" role="progressbar" aria-valuenow="0%" style="width:0%">0%</div></div><div>pending...</div><div>&nbsp;</div>');
+          div = $('<div class="mb-3"><span class="h5">' + measure_name + ' - <span id="' + measure_name + '_state">pending...</span></span><div class="progress"><div id="' + measure_name + '_bar" class="progress-bar" role="progressbar" aria-valuenow="0%" style="width:0%">0%</div></div></div>');
+          $('#status').append(div);
+      }
+      status_url = "/johann/scores/" + data.name + "/status_alt";
+      update_progress(status_url, []);
+  }
+  function update_progress(status_url, old_messages, use_renderjson=false) {
+      // send GET request to status URL
+      $.getJSON(status_url, function(ajax_data) {
+          if (ajax_data['success'] == false) {
+              $('#status_raw').text('Status retrieval failed');
+              return;
+          }
+
+          ajax_data = ajax_data['data']
+
+          // update UI
+          $('#last_update').text(new Date().toISOString());
+          $('#status_raw_full').text(JSON.stringify(ajax_data['raw'], null, 4));
+          $('#status_raw_expandable').html(renderjson(ajax_data['raw']));
+
+          var percent;
+          if (ajax_data['total'] == 0) { percent = 0; }
+          else if (ajax_data['state'] == "SUCCESS") {
+              percent = 100;
+          }
+          // PLANNED: error percent and change here if state == "FAILURE"
+          else {
+              percent = parseInt(ajax_data['current'] * 100 / ajax_data['total']);
+          }
+          $('#overall_bar').attr('aria-valuenow', percent + '%').css('width', percent + '%').text(percent + '%');
+
+          if (ajax_data['state'] == "PENDING") {
+              $('#overall_state').text('not yet started');
+          }
+          else {
+              $('#overall_state').text(ajax_data['state']);
+          }
+
+          var m_name;
+          for (m_name in ajax_data['measures']) {
+              //console.log('working on ' + m_name);
+              var m_status = ajax_data['measures'][m_name];
+              var m_percent;
+              if (m_status['total'] == 0) { m_percent = 0; }
+              else if (m_status['state'] == 'SUCCESS') {
+                  m_percent = 100;
+              }
+              // PLANNED: error percent and change here if state = 'error'
+              // should be different based on fails = 0 (expired jobs) vs fails != 0
+              else {
+                  m_percent = parseInt(m_status['current'] * 100 / m_status['total']);
+              }
+              $("#" + m_name + "_bar").attr('aria-valuenow', m_percent + '%').css('width', m_percent + '%').text(m_percent + '%');
+              if (ajax_data['raw']['measures'][m_name]['state'] == "PENDING") {
+                  $("#" + m_name + "_state").text("not yet started");
+              }
+              else {
+                  $("#" + m_name + "_state").text(m_status['state']);
+              }
+
+          }
+
+          // PLANNED: finish this and uncomment
+          /*
+          var messages = ajax_data['messages'];
+          var new_messages = [];
+          var i;
+          for (i in messages) {
+              var m = messages[i];
+              if (! old_messages.includes(m)) {
+                  new_messages.push(m);
+              }
+          }
+          $(status_div.childNodes[1]).text(new_messages.join('; '));
+          */
+          if (ajax_data['raw']['finished']) {
+              // If we prevent failure from propagating all the way up instantly, we can add FAILURE back here
+              // || ajax_data['state'] == 'FAILURE') {
+
+              //PLANNED: finish this and uncomment
+              /*
+              if ('result' in ajax_data) {
+                  // show result
+                  $(status_divs['overall'].childNodes[3]).text('Result: ' + ajax_data['result']);
+              }
+              else {
+                  // something unexpected happened
+                  $(status_divs['overall'].childNodes[3]).text('Result: ' + ajax_data['state']);
+              }
+              */
+
+              // use renderjson since it won't be constantly updating anymore
+              if (! do_once) {
+                  do_once = true;
+                  setTimeout(function () {
+                      update_progress(status_url, [], use_renderjson = true);
+                  }, 500);
+              }
+          }
+          else {
+              // rerun in 0.5 seconds
+              setTimeout(function() {
+                  update_progress(status_url, []);
+                  //update_progress(status_url, status_divs, old_messages.concat(new_messages));
+              }, 500);
+          }
+      });
+  }
+  $(window).on('load', init());
+</script>
+{% endblock %} {% block app_content %}
+<h1>Scenario Status</h1>
+<div class="card">
+  <div class="card-header">
+    Scenario Status for '<span id="scenario_name">pending...</span>' as of:
+    <span id="last_update">pending...</span>
+  </div>
+  <div id="status" class="card-body"></div>
+</div>
+<div class="card mt-3">
+  <div class="card-header">Raw Status</div>
+  <div class="card-body">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#full">Full</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#expandable">Expandable</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div id="full" class="tab-pane container active">
+        <pre id="status_raw_full">pending...</pre>
+      </div>
+      <div id="expandable" class="tab-pane container">
+        <pre id="status_raw_expandable">pending...</pre>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

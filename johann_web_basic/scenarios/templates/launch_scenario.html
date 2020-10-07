@@ -1,0 +1,23 @@
+{% extends "base.html" %} {% block copyright %}
+<!--
+    # Copyright (c) 2020-present, The Johann Web Basic Authors. All Rights Reserved.
+    # Use of this source code is governed by a BSD-3-clause license that can
+    # be found in the LICENSE file. See the AUTHORS file for names of contributors.
+    -->
+{% endblock copyright %} {% block app_content %} {% import "bootstrap/form.html" as wtf
+%}
+<h1>Launch Scenario</h1>
+<div class="card">
+  <div class="card-header">Customize and Launch Scenario '{{ form.name.data }}'</div>
+  <div class="card-body">
+    {% if form.errors %}
+    <ul class="errors">
+      {% for field_name, field_errors in form.errors|dictsort if field_errors %} {% for
+      error in field_errors %}
+      <li class="text-danger">{{ form[field_name].name }}: {{ error }}</li>
+      {% endfor %} {% endfor %}
+    </ul>
+    {% endif %} {{ wtf.render_form(form, form_type='horizontal') }}
+  </div>
+</div>
+{% endblock %}
